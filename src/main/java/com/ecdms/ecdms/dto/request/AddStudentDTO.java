@@ -11,6 +11,7 @@ import java.util.Date;
 @Data
 public class AddStudentDTO {
 
+    private int stuID;
     private String firstName;
     private String lastName;
     private String fullName;

@@ -7,4 +7,6 @@ public interface UserService {
     ResponseEntity addStudent(AddStudentDTO addStudentDTO);
 
     ResponseEntity getAllStudents();
+
+    ResponseEntity getStudentByID(int userID);
 }

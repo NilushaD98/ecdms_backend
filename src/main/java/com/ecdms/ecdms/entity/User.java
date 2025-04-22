@@ -64,6 +64,8 @@ public class User implements Serializable , UserDetails {
     @OneToMany(mappedBy = "user")
     private List<TokenHistory> tokenHistoryList;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Student student;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
@@ -78,6 +80,18 @@ public class User implements Serializable , UserDetails {
                 }
         );
         return authorities;
+    }
+
+    public User(Integer userId) {
+        this.userId = userId;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
     @Override

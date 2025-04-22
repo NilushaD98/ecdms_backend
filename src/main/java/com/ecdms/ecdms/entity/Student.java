@@ -32,7 +32,8 @@ public class Student {
     private String contactOne;
     private String contactTwo;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_user_id", referencedColumnName = "user_id")
     private User user;
 
     public Student(String firstName, String lastName, String fullName, Date dob, String gender, String address, String program, String ageCategory, String fullNameParent, String relationship, String email, String contactOne, String contactTwo, User user) {

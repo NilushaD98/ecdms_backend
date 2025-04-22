@@ -17,29 +17,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @todo Set up allowed origins for advanced security and better protection against fraudulent requests
  * @since V2.0.0
  */
-@Configuration
-@Primary
+//@Configuration
+//@Primary
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-
-    /**
-     * CORS configuration method
-     * @param registry CORS Registry
-     */
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-       /* registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(MAX_AGE_SECS);
-        registry.addMapping("/**").allowedMethods("*").allowCredentials(false) */
-        registry.addMapping("/**").allowedMethods("*").allowedOriginPatterns("*");
-    }
-
-
-
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**") // Allow all endpoints
+//                .allowedOrigins("http://localhost:4200") // Allow requests from this origin
+//                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allowed HTTP methods
+//                .allowedHeaders("*") // Allow all headers
+//                .allowCredentials(true); // Allow cookies or authentication headers
+//    }
 //    @Bean
 //    public CorsConfigurationSource corsConfigurationSource() {
 //        CorsConfiguration configuration = new CorsConfiguration();

@@ -55,7 +55,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             }
 
             Optional<TokenHistory> tokenHistoryByTokenUUIDEquals = tokenHistoryRepository.findTokenHistoryByTokenUUIDEquals(getJwtFromRequest(request));
-            if (tokenHistoryByTokenUUIDEquals.isEmpty()){
+            log.info(""+tokenHistoryByTokenUUIDEquals.isPresent());
+            if (!tokenHistoryByTokenUUIDEquals.isPresent()){
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 StandardResponse failureResponse = new StandardResponse(false,"Unauthorized");
                 try {
@@ -88,7 +89,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
      * @return Token extracted from the request
      */
     private String getJwtFromRequest(HttpServletRequest request) {
+        log.info(""+request);
         String bearerToken = request.getHeader("Authorization");
+        log.info("Raw Authorization Header: {}",bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             log.info("token = "+ bearerToken.substring(7));
             return bearerToken.substring(7);

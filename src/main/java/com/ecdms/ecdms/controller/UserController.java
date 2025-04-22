@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin("*")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
@@ -22,11 +21,13 @@ public class UserController {
         return userService.addStudent(addStudentDTO);
     }
     @GetMapping("/get-all-students")
-    public ResponseEntity getAllStudent(){
+    public ResponseEntity getAllStudent(
+
+    ){
         return userService.getAllStudents();
     }
     @GetMapping("/get-student-by-id")
-    public ResponseEntity getStudentByID(){
-        return null;
+    public ResponseEntity getStudentByID(@RequestParam("userID") int userID){
+        return userService.getStudentByID(userID);
     }
 }
