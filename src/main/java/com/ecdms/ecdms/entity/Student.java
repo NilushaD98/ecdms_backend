@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "student")
@@ -31,11 +33,26 @@ public class Student {
     private String email;
     private String contactOne;
     private String contactTwo;
+    @Column(length = 1000)
+    private String specialNotice;
+    @Column(length = 1000)
+    private String allergies;
+
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_user_id", referencedColumnName = "user_id")
     private User user;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classroom_class_id")
+    private Classroom classroom;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Attendance> attendances = new ArrayList<>();
+
+    @OneToMany(mappedBy = "student",fetch = FetchType.LAZY)
+    private List<ExamResult> examResults = new ArrayList<>();
     public Student(String firstName, String lastName, String fullName, Date dob, String gender, String address, String program, String ageCategory, String fullNameParent, String relationship, String email, String contactOne, String contactTwo, User user) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -51,5 +68,9 @@ public class Student {
         this.contactOne = contactOne;
         this.contactTwo = contactTwo;
         this.user = user;
+    }
+
+    public Student(Integer stuID) {
+        this.stuID = stuID;
     }
 }

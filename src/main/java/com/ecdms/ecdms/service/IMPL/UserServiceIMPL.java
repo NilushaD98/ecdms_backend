@@ -2,16 +2,12 @@ package com.ecdms.ecdms.service.IMPL;
 
 import com.ecdms.ecdms.dto.common.StandardResponse;
 import com.ecdms.ecdms.dto.request.AddStudentDTO;
-import com.ecdms.ecdms.entity.Role;
-import com.ecdms.ecdms.entity.Student;
-import com.ecdms.ecdms.entity.User;
-import com.ecdms.ecdms.entity.UserRoleDetails;
+import com.ecdms.ecdms.dto.request.TeacherDTO;
+import com.ecdms.ecdms.entity.*;
 import com.ecdms.ecdms.enums.Status;
 import com.ecdms.ecdms.exceptions.InternalServerErrorException;
-import com.ecdms.ecdms.repository.RoleRepository;
-import com.ecdms.ecdms.repository.StudentRepository;
-import com.ecdms.ecdms.repository.UserRepository;
-import com.ecdms.ecdms.repository.UserRoleDetailsRepository;
+import com.ecdms.ecdms.repository.*;
+import com.ecdms.ecdms.service.PaymentService;
 import com.ecdms.ecdms.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +37,9 @@ public class UserServiceIMPL implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final UserRoleDetailsRepository userRoleDetailsRepository;
-
+    private final TeacherRepository teacherRepository;
+    private final ClassroomRepository classroomRepository;
+    private final PaymentService paymentService;
     @Override
     public ResponseEntity addStudent(AddStudentDTO addStudentDTO) {
         try {
@@ -79,6 +77,14 @@ public class UserServiceIMPL implements UserService {
             studentRepository.save(student);
             boolean vortexOtp = mailSender(addStudentDTO.getEmail(), "ECDMS Password","ECDMS Password is - " + samplePassword+". Reset this when logged first time.");
             if(vortexOtp){
+                if(addStudentDTO.getProgram().equals("ecd")){
+                    paymentService.createYearlyPaymentPlan(student.getStuID(),"Pre School",2000);
+                } else if (addStudentDTO.getProgram().equals("dc")) {
+                    paymentService.createYearlyPaymentPlan(student.getStuID(),"Day Care",7000);
+                }else {
+                    paymentService.createYearlyPaymentPlan(student.getStuID(),"Pre School",2000);
+                    paymentService.createYearlyPaymentPlan(student.getStuID(),"Day Care",7000);
+                }
                 return new ResponseEntity(new StandardResponse(true,"Student Added Successfully"), HttpStatus.CREATED);
             }else {
                 throw new InternalServerErrorException("Email send error.");
@@ -160,6 +166,122 @@ public class UserServiceIMPL implements UserService {
             log.error(e.getMessage());
             throw e;
         }
+    }
+
+    @Override
+    public ResponseEntity deleteStudentByID(int userID) {
+        try {
+            Optional<Student> byId = studentRepository.findById(userID);
+            if(byId.isPresent()){
+                studentRepository.deleteById(userID);
+                return new ResponseEntity(new StandardResponse(200,"Student Removed.",byId.get().getFirstName()),HttpStatus.OK);
+            }else {
+                throw new UsernameNotFoundException("Student not found in system.");
+            }
+        }catch (UsernameNotFoundException usernameNotFoundException){
+            throw usernameNotFoundException;
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public ResponseEntity addTeacher(TeacherDTO teacherDTO) {
+        try {
+            List<Classroom> classroomList = classroomRepository.findAllById(teacherDTO.getClassroomList());
+            Teacher teacher = new Teacher(
+                    teacherDTO.getFullName(),
+                    teacherDTO.getContact(),
+                    teacherDTO.getNic(),
+                    teacherDTO.getDob(),
+                    teacherDTO.getGender(),
+                    teacherDTO.getAddress(),
+                    teacherDTO.getSalary(),
+                    teacherDTO.getJoiningDate(),
+                    classroomList
+            );
+            teacherRepository.save(teacher);
+            return new ResponseEntity<>(new StandardResponse(true,"Teacher added successfully."),HttpStatus.CREATED);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public ResponseEntity getAllTeachers() {
+        List<Teacher> all = teacherRepository.findAll();
+        List<TeacherDTO> teacherDTOList = new ArrayList<>();
+        for(Teacher teacher:all){
+            List<Classroom> classrooms = teacher.getClassrooms();
+            List<Integer> classRoomIDList = new ArrayList<>();
+            for(Classroom classroom:classrooms){
+                classRoomIDList.add(classroom.getClassID());
+            }
+            TeacherDTO teacherDTO = new TeacherDTO(
+                    teacher.getTeacherID(),
+                    teacher.getFullName(),
+                    teacher.getContact(),
+                    teacher.getNic(),
+                    teacher.getDob(),
+                    teacher.getGender(),
+                    teacher.getAddress(),
+                    teacher.getSalary(),
+                    teacher.getJoiningDate(),
+                    classRoomIDList
+            );
+            teacherDTOList.add(teacherDTO);
+        }
+        return new ResponseEntity(new StandardResponse(200,"Teacher List",teacherDTOList),HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity getTeacherByID(int teacherID) {
+        Optional<Teacher> byId = teacherRepository.findById(teacherID);
+        Teacher teacher = byId.get();
+        List<Classroom> classrooms = teacher.getClassrooms();
+        List<Integer> classRoomIDList = new ArrayList<>();
+        for(Classroom classroom:classrooms){
+            classRoomIDList.add(classroom.getClassID());
+        }
+        TeacherDTO teacherDTO = new TeacherDTO(
+                teacher.getTeacherID(),
+                teacher.getFullName(),
+                teacher.getContact(),
+                teacher.getNic(),
+                teacher.getDob(),
+                teacher.getGender(),
+                teacher.getAddress(),
+                teacher.getSalary(),
+                teacher.getJoiningDate(),
+                classRoomIDList
+        );
+        return new ResponseEntity(new StandardResponse(200,"Teacher By ID",teacherDTO),HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity updateTeacherByID(TeacherDTO teacherDTO) {
+        Optional<Teacher> byId = teacherRepository.findById(teacherDTO.getTeacherID());
+        Teacher teacher = byId.get();
+        List<Classroom> classroomList = classroomRepository.findAllById(teacherDTO.getClassroomList());
+        teacher.setFullName(teacherDTO.getFullName());
+        teacher.setContact(teacherDTO.getContact());
+        teacher.setNic(teacherDTO.getNic());
+        teacher.setDob(teacherDTO.getDob());
+        teacher.setGender(teacherDTO.getGender());
+        teacher.setAddress(teacherDTO.getAddress());
+        teacher.setSalary(teacherDTO.getSalary());
+        teacher.setJoiningDate(teacherDTO.getJoiningDate());
+        teacher.setClassrooms(classroomList);
+        teacherRepository.save(teacher);
+        return new ResponseEntity<>(new StandardResponse(true,"Teacher updated successfully."),HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity removeTeacherByID(int teacherID) {
+        teacherRepository.deleteById(teacherID);
+        return new ResponseEntity<>(new StandardResponse(true,"Teacher removed successfully."),HttpStatus.OK);
     }
 
     public boolean mailSender(String toMail, String subject, String body){
