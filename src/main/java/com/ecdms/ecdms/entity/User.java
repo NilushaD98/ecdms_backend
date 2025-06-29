@@ -55,17 +55,14 @@ public class User implements Serializable , UserDetails {
     @Column(name = "login_attempts", nullable = false)
     private Integer loginAttempts;
 
-    @OneToMany(fetch = FetchType.EAGER,mappedBy = "user")
-    private List<UserRoleDetails>  roleDetailsList;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRoleDetails> roleDetailsList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<OTP>  otpList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<TokenHistory> tokenHistoryList;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Student student;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
@@ -84,14 +81,6 @@ public class User implements Serializable , UserDetails {
 
     public User(Integer userId) {
         this.userId = userId;
-    }
-
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
     }
 
     @Override

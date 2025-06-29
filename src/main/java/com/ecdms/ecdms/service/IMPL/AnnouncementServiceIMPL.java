@@ -4,14 +4,8 @@ import com.ecdms.ecdms.dto.AnnouncementDTO;
 import com.ecdms.ecdms.dto.CommentDTO;
 import com.ecdms.ecdms.dto.LikeDTO;
 import com.ecdms.ecdms.dto.UserDTO;
-import com.ecdms.ecdms.entity.Announcement;
-import com.ecdms.ecdms.entity.PostComment;
-import com.ecdms.ecdms.entity.PostLike;
-import com.ecdms.ecdms.entity.User;
-import com.ecdms.ecdms.repository.AnnouncementRepository;
-import com.ecdms.ecdms.repository.PostCommentRepository;
-import com.ecdms.ecdms.repository.PostLikeRepository;
-import com.ecdms.ecdms.repository.UserRepository;
+import com.ecdms.ecdms.entity.*;
+import com.ecdms.ecdms.repository.*;
 import com.ecdms.ecdms.service.AnnouncementService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +27,7 @@ public class AnnouncementServiceIMPL implements AnnouncementService {
     private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
 
 
     @Override
@@ -126,9 +121,10 @@ public class AnnouncementServiceIMPL implements AnnouncementService {
         dto.setPostCommentID(comment.getPostCommentID());
         dto.setComment(comment.getComment());
         dto.setCommentDate(comment.getCommentDate());
+        Optional<Student> student = studentRepository.findByEmailEquals(comment.getUser().getUsername());
         UserDTO userDTO = new UserDTO(
                 "",
-                comment.getUser().getStudent().getFullNameParent() != null ? comment.getUser().getStudent().getFullNameParent():""
+                student.get().getFullNameParent() != null ? student.get().getFullNameParent():""
         );
         dto.setUserDTO(userDTO);
         return dto;

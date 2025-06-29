@@ -20,10 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -71,9 +68,9 @@ public class UserServiceIMPL implements UserService {
                     addStudentDTO.getRelationship(),
                     addStudentDTO.getEmail(),
                     addStudentDTO.getContactOne(),
-                    addStudentDTO.getContactTwo(),
-                    user
+                    addStudentDTO.getContactTwo()
             );
+            student.setStatus("ACTIVE");
             studentRepository.save(student);
             boolean vortexOtp = mailSender(addStudentDTO.getEmail(), "ECDMS Password","ECDMS Password is - " + samplePassword+". Reset this when logged first time.");
             if(vortexOtp){
@@ -102,7 +99,7 @@ public class UserServiceIMPL implements UserService {
     public ResponseEntity getAllStudents() {
         try {
             List<AddStudentDTO> addStudentDTOList = new ArrayList<>();
-            List<Student> all = studentRepository.findAll();
+            List<Student> all = studentRepository.findAllActive();
             for(Student student:all){
                 AddStudentDTO addStudentDTO = new AddStudentDTO(
                         student.getStuID(),
@@ -170,39 +167,59 @@ public class UserServiceIMPL implements UserService {
 
     @Override
     public ResponseEntity deleteStudentByID(int userID) {
-        try {
-            Optional<Student> byId = studentRepository.findById(userID);
-            if(byId.isPresent()){
-                studentRepository.deleteById(userID);
-                return new ResponseEntity(new StandardResponse(200,"Student Removed.",byId.get().getFirstName()),HttpStatus.OK);
-            }else {
-                throw new UsernameNotFoundException("Student not found in system.");
-            }
-        }catch (UsernameNotFoundException usernameNotFoundException){
-            throw usernameNotFoundException;
-        }catch (Exception e){
-            log.error(e.getMessage());
-            throw e;
-        }
+        Optional<Student> byId = studentRepository.findById(userID);
+            Optional<User> byUsernameEquals = userRepository.findByUsernameEquals(byId.get().getEmail());
+            studentRepository.delete(byId.get());
+            userRepository.delete(byUsernameEquals.get());
+
+            return new ResponseEntity(new StandardResponse(true,"Student Removed."),HttpStatus.OK);
+
     }
 
     @Override
     public ResponseEntity addTeacher(TeacherDTO teacherDTO) {
         try {
+            String samplePassword = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+
+            User user = new User();
+            user.setUserUuid(UUID.randomUUID().toString());
+            user.setUsername(teacherDTO.getEmail());
+            user.setPassword(passwordEncoder.encode(samplePassword));
+            user.setCreatedBy("admin");
+            user.setUpdatedBy("admin");
+            user.setStatus(Status.ACTIVE.toString());
+            user.setLoginAttempts(0);
+            userRepository.save(user);
+            UserRoleDetails userRoleDetails = new UserRoleDetails(
+                    new Role(4),
+                    user
+            );
+            userRoleDetailsRepository.save(userRoleDetails);
+            log.info(teacherDTO.getClassroomList().toString());
             List<Classroom> classroomList = classroomRepository.findAllById(teacherDTO.getClassroomList());
+            log.info(""+classroomList.size());
             Teacher teacher = new Teacher(
                     teacherDTO.getFullName(),
                     teacherDTO.getContact(),
                     teacherDTO.getNic(),
                     teacherDTO.getDob(),
+                    teacherDTO.getEmail(),
                     teacherDTO.getGender(),
                     teacherDTO.getAddress(),
                     teacherDTO.getSalary(),
                     teacherDTO.getJoiningDate(),
                     classroomList
             );
+            for (Classroom classroom : classroomList) {
+                classroom.getTeachers().add(teacher); // Add teacher to each classroom
+            }
             teacherRepository.save(teacher);
-            return new ResponseEntity<>(new StandardResponse(true,"Teacher added successfully."),HttpStatus.CREATED);
+            boolean vortexOtp = mailSender(teacherDTO.getEmail(), "ECDMS Password","ECDMS Password is - " + samplePassword+". Reset this when logged first time.");
+            if(vortexOtp){
+                return new ResponseEntity<>(new StandardResponse(true,"Teacher added successfully."),HttpStatus.CREATED);
+            }else {
+                throw new InternalServerErrorException("Email send error.");
+            }
         }catch (Exception e){
             log.error(e.getMessage());
             throw e;
@@ -225,6 +242,7 @@ public class UserServiceIMPL implements UserService {
                     teacher.getContact(),
                     teacher.getNic(),
                     teacher.getDob(),
+                    teacher.getEmail(),
                     teacher.getGender(),
                     teacher.getAddress(),
                     teacher.getSalary(),
@@ -251,6 +269,7 @@ public class UserServiceIMPL implements UserService {
                 teacher.getContact(),
                 teacher.getNic(),
                 teacher.getDob(),
+                teacher.getEmail(),
                 teacher.getGender(),
                 teacher.getAddress(),
                 teacher.getSalary(),
@@ -262,24 +281,49 @@ public class UserServiceIMPL implements UserService {
 
     @Override
     public ResponseEntity updateTeacherByID(TeacherDTO teacherDTO) {
-        Optional<Teacher> byId = teacherRepository.findById(teacherDTO.getTeacherID());
-        Teacher teacher = byId.get();
-        List<Classroom> classroomList = classroomRepository.findAllById(teacherDTO.getClassroomList());
-        teacher.setFullName(teacherDTO.getFullName());
-        teacher.setContact(teacherDTO.getContact());
-        teacher.setNic(teacherDTO.getNic());
-        teacher.setDob(teacherDTO.getDob());
-        teacher.setGender(teacherDTO.getGender());
-        teacher.setAddress(teacherDTO.getAddress());
-        teacher.setSalary(teacherDTO.getSalary());
-        teacher.setJoiningDate(teacherDTO.getJoiningDate());
-        teacher.setClassrooms(classroomList);
-        teacherRepository.save(teacher);
-        return new ResponseEntity<>(new StandardResponse(true,"Teacher updated successfully."),HttpStatus.OK);
+        try {
+            Teacher existingTeacher = teacherRepository.findById(teacherDTO.getTeacherID())
+                    .orElseThrow(() -> new InternalServerErrorException("Teacher not found"));
+
+            List<Classroom> newClassroomList = classroomRepository.findAllById(teacherDTO.getClassroomList());
+
+            Set<Classroom> oldClassroomSet = new HashSet<>(existingTeacher.getClassrooms());
+
+            for (Classroom classroom : oldClassroomSet) {
+                classroom.getTeachers().remove(existingTeacher);
+            }
+
+            existingTeacher.getClassrooms().clear();
+
+            for (Classroom classroom : newClassroomList) {
+                classroom.getTeachers().add(existingTeacher); // Update inverse side
+                existingTeacher.getClassrooms().add(classroom); // Update owning side
+            }
+
+            existingTeacher.setFullName(teacherDTO.getFullName());
+            existingTeacher.setContact(teacherDTO.getContact());
+            existingTeacher.setNic(teacherDTO.getNic());
+            existingTeacher.setDob(teacherDTO.getDob());
+            existingTeacher.setGender(teacherDTO.getGender());
+            existingTeacher.setAddress(teacherDTO.getAddress());
+            existingTeacher.setSalary(teacherDTO.getSalary());
+            existingTeacher.setJoiningDate(teacherDTO.getJoiningDate());
+
+            classroomRepository.saveAll(newClassroomList);
+            teacherRepository.save(existingTeacher);
+
+            return new ResponseEntity<>(new StandardResponse(true, "Teacher updated successfully."), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new InternalServerErrorException("Error occurred while updating teacher.");
+        }
     }
 
     @Override
     public ResponseEntity removeTeacherByID(int teacherID) {
+        Optional<Teacher> byId = teacherRepository.findById(teacherID);
+        Optional<User> byUsernameEquals = userRepository.findByUsernameEquals(byId.get().getEmail());
+        userRepository.delete(byUsernameEquals.get());
         teacherRepository.deleteById(teacherID);
         return new ResponseEntity<>(new StandardResponse(true,"Teacher removed successfully."),HttpStatus.OK);
     }

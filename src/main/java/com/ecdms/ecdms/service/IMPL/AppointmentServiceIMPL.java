@@ -56,7 +56,7 @@ public class AppointmentServiceIMPL implements AppointmentService {
             appointmentRepository.save(byId.get());
             Optional<User> user = userRepository.findById(appointmentDTO.getStudentID());
 
-            userServiceIMPL.mailSender(user.get().getStudent().getEmail(),"Appointment Approved","Your appointment was approved on"+formattedDate);
+            userServiceIMPL.mailSender(user.get().getUsername(),"Appointment Approved","Your appointment was approved on"+formattedDate);
             return new ResponseEntity(new StandardResponse(true,"Appointment approved."), HttpStatus.OK);
         }catch (Exception e){
             log.error(e.getMessage());

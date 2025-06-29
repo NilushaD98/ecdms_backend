@@ -1,6 +1,7 @@
 package com.ecdms.ecdms.controller;
 
 import com.ecdms.ecdms.dto.request.AttendanceMarkDTO;
+import com.ecdms.ecdms.dto.request.AttendanceRequestDTO;
 import com.ecdms.ecdms.service.AttendanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,5 +26,14 @@ public class AttendanceController {
     @PostMapping("/teacher-attendance-mark")
     public ResponseEntity teacherAttendanceMark(@RequestBody AttendanceMarkDTO attendanceMarkDTO){
         return attendanceService.teacherAttendanceMark(attendanceMarkDTO);
+    }
+        @PostMapping("/get-attendance-by-date")
+    public ResponseEntity getAttendanceByDate(@RequestBody AttendanceRequestDTO attendanceRequestDTO){
+        return attendanceService.getAttendanceByDate(attendanceRequestDTO);
+    }
+
+    @PostMapping("/get-attendance-by-date-teacher")
+    public ResponseEntity getAttendanceByDateTeacher(@RequestBody AttendanceRequestDTO attendanceRequestDTO){
+        return attendanceService.getAttendanceByDateTeacher(attendanceRequestDTO);
     }
 }

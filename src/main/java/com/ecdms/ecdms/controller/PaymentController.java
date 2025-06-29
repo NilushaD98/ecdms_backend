@@ -1,5 +1,6 @@
 package com.ecdms.ecdms.controller;
 
+import com.ecdms.ecdms.dto.request.PaymentFilterDTO;
 import com.ecdms.ecdms.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,5 +18,7 @@ public class PaymentController {
 
 
     @GetMapping("/get-payments")
-    public ResponseEntity getPayments(){}
+    public ResponseEntity getPayments(@RequestBody PaymentFilterDTO paymentFilterDTO){
+        return paymentService.getPayments(paymentFilterDTO);
+    }
 }

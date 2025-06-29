@@ -18,6 +18,7 @@ public class TeacherDTO {
     private String contact;
     private String nic;
     private Date dob;
+    private String email;
     private String gender;
     private String address;
     private double salary;

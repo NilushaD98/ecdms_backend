@@ -1,13 +1,16 @@
 package com.ecdms.ecdms.service.IMPL;
 
+import com.ecdms.ecdms.dto.request.PaymentFilterDTO;
 import com.ecdms.ecdms.entity.Payment;
 import com.ecdms.ecdms.entity.Student;
+import com.ecdms.ecdms.exceptions.InternalServerErrorException;
 import com.ecdms.ecdms.repository.PaymentRepository;
 import com.ecdms.ecdms.repository.StudentRepository;
 import com.ecdms.ecdms.service.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -45,6 +48,16 @@ public class PaymentServiceIMPL implements PaymentService {
             paymentRepository.save(payment);
 
             cal.add(Calendar.MONTH, 1);
+        }
+    }
+
+    @Override
+    public ResponseEntity getPayments(PaymentFilterDTO paymentFilterDTO) {
+        try {
+            return null;
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred in get payments.");
         }
     }
 

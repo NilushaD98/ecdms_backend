@@ -21,6 +21,7 @@ public class Teacher {
     private String contact;
     private String nic;
     private Date dob;
+    private String email;
     private String gender;
     private String address;
     private double salary;
@@ -34,11 +35,12 @@ public class Teacher {
         this.teacherID = teacherID;
     }
 
-    public Teacher(String fullName, String contact, String nic, Date dob, String gender, String address, double salary, Date joiningDate, List<Classroom> classrooms) {
+    public Teacher(String fullName, String contact, String nic, Date dob,String email, String gender, String address, double salary, Date joiningDate, List<Classroom> classrooms) {
         this.fullName = fullName;
         this.contact = contact;
         this.nic = nic;
         this.dob = dob;
+        this.email = email;
         this.gender = gender;
         this.address = address;
         this.salary = salary;

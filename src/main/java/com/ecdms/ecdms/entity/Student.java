@@ -33,15 +33,11 @@ public class Student {
     private String email;
     private String contactOne;
     private String contactTwo;
+    private String status;
     @Column(length = 1000)
     private String specialNotice;
     @Column(length = 1000)
     private String allergies;
-
-
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_user_id", referencedColumnName = "user_id")
-    private User user;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -51,9 +47,9 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Attendance> attendances = new ArrayList<>();
 
-    @OneToMany(mappedBy = "student",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "student",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<ExamResult> examResults = new ArrayList<>();
-    public Student(String firstName, String lastName, String fullName, Date dob, String gender, String address, String program, String ageCategory, String fullNameParent, String relationship, String email, String contactOne, String contactTwo, User user) {
+    public Student(String firstName, String lastName, String fullName, Date dob, String gender, String address, String program, String ageCategory, String fullNameParent, String relationship, String email, String contactOne, String contactTwo) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.fullName = fullName;
@@ -67,7 +63,6 @@ public class Student {
         this.email = email;
         this.contactOne = contactOne;
         this.contactTwo = contactTwo;
-        this.user = user;
     }
 
     public Student(Integer stuID) {
