@@ -29,8 +29,10 @@ public class TestTypeServiceIMPL implements TestTypeService {
     public ResponseEntity addTestType(TestTypeDTO testTypeDTO) {
         TestType testType = new TestType(
                 testTypeDTO.getTestName(),
-                testTypeDTO.getDescription()
+                testTypeDTO.getDescription(),
+                testTypeDTO.getTestDate()
         );
+        System.out.println(testType.getTestDate());
         testTypeRepository.save(testType);
         return new ResponseEntity(new StandardResponse(true,"Test Type Added."), HttpStatus.OK);
     }
@@ -52,7 +54,8 @@ public class TestTypeServiceIMPL implements TestTypeService {
             TestTypeDTO testTypeDTO = new TestTypeDTO(
                     testType.getTestTypeID(),
                     testType.getTestName(),
-                    testType.getDescription()
+                    testType.getDescription(),
+                    testType.getTestDate()
             );
             testTypeDTOList.add(testTypeDTO);
         }
@@ -66,7 +69,8 @@ public class TestTypeServiceIMPL implements TestTypeService {
         TestTypeDTO testTypeDTO = new TestTypeDTO(
                 byId.get().getTestTypeID(),
                 byId.get().getTestName(),
-                byId.get().getDescription()
+                byId.get().getDescription(),
+                byId.get().getTestDate()
         );
         return new ResponseEntity(new StandardResponse(200,"Test Type by ID.",testTypeDTO), HttpStatus.OK);
     }

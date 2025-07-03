@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor
@@ -21,12 +22,14 @@ public class TestType {
     private Integer testTypeID;
     private String testName;
     private String description;
+    private Date testDate;
     @OneToMany(mappedBy = "testType",fetch = FetchType.LAZY)
     private List<ExamResult> examResults = new ArrayList<>();
 
-    public TestType(String testName, String description) {
+    public TestType(String testName, String description, Date testDate) {
         this.testName = testName;
         this.description = description;
+        this.testDate = testDate;
     }
 
     public TestType(Integer testTypeID) {
