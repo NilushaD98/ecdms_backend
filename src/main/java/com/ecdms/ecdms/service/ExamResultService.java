@@ -11,4 +11,6 @@ public interface ExamResultService {
     ResponseEntity examResultByStudentID(int studentID);
 
     ResponseEntity examResultByTestID(int testID);
+
+    ResponseEntity removeResult(int resultID);
 }

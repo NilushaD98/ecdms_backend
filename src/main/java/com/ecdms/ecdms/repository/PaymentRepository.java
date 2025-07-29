@@ -16,4 +16,7 @@ public interface PaymentRepository extends JpaRepository<Payment,Integer> {
     List<Payment> findByDueDateBetween(@Param("start") Date start, @Param("end") Date end);
 
     boolean existsByUserIdAndDueDateAndPaidTrue(Integer userId, Date dueDate);
+
+    @Query("SELECT p FROM Payment p WHERE p.userId=:studentID")
+    List<Payment> findByUserID( @Param("studentID")Integer studentID);
 }

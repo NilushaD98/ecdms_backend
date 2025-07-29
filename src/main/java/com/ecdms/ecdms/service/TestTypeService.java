@@ -13,4 +13,6 @@ public interface TestTypeService {
     ResponseEntity getTestTypeByID(int testTypeID);
 
     ResponseEntity removeTestTypeByID(int testTypeID);
+
+    ResponseEntity getTestTypeAllDetailsByID(int testTypeID);
 }

@@ -12,4 +12,6 @@ public class AuthenticationSuccessDTO {
 
     private TokenType tokenType;
     private String token;
+    private String userType;
+    private int userID;
 }

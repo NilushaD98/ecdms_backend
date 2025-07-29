@@ -1,6 +1,7 @@
 package com.ecdms.ecdms.service;
 
 import com.ecdms.ecdms.dto.request.PaymentFilterDTO;
+import com.ecdms.ecdms.dto.response.PaymentDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface PaymentService {
@@ -8,4 +9,6 @@ public interface PaymentService {
     void createYearlyPaymentPlan(Integer userId, String type, double amount);
 
     ResponseEntity getPayments(PaymentFilterDTO paymentFilterDTO);
+
+    ResponseEntity makePayment(PaymentDTO paymentDTO);
 }

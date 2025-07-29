@@ -1,6 +1,8 @@
 package com.ecdms.ecdms.service.IMPL;
 
+import com.ecdms.ecdms.dto.common.StandardResponse;
 import com.ecdms.ecdms.dto.request.PaymentFilterDTO;
+import com.ecdms.ecdms.dto.response.PaymentDTO;
 import com.ecdms.ecdms.entity.Payment;
 import com.ecdms.ecdms.entity.Student;
 import com.ecdms.ecdms.exceptions.InternalServerErrorException;
@@ -10,6 +12,7 @@ import com.ecdms.ecdms.service.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,10 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -54,10 +54,38 @@ public class PaymentServiceIMPL implements PaymentService {
     @Override
     public ResponseEntity getPayments(PaymentFilterDTO paymentFilterDTO) {
         try {
-            return null;
+            List<Payment> paymentList = paymentRepository.findByUserID(paymentFilterDTO.getStudentID());
+            List<PaymentDTO> paymentDTOList = new ArrayList<>();
+            for (Payment payment:paymentList){
+                PaymentDTO paymentDTO = new PaymentDTO(
+                        payment.getPaymentId(),
+                        payment.getType(),
+                        payment.getAmount(),
+                        payment.getDueDate(),
+                        payment.getPaidDate(),
+                        payment.isPaid()
+                );
+                paymentDTOList.add(paymentDTO);
+            }
+            return new ResponseEntity(new StandardResponse(200,"All Payments",paymentList), HttpStatus.OK);
+
         }catch (Exception e){
             log.error(e.getMessage());
             throw new InternalServerErrorException("Error occurred in get payments.");
+        }
+    }
+
+    @Override
+    public ResponseEntity makePayment(PaymentDTO paymentDTO) {
+        try {
+            Optional<Payment> byId = paymentRepository.findById(paymentDTO.getPaymentId());
+            byId.get().setPaid(true);
+            byId.get().setPaidDate(new Date());
+            paymentRepository.save(byId.get());
+            return new ResponseEntity(new StandardResponse(true,"Payment Successful Added."),HttpStatus.OK);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred in make payment.");
         }
     }
 

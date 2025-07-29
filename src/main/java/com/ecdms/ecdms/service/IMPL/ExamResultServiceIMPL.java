@@ -68,17 +68,7 @@ public class ExamResultServiceIMPL implements ExamResultService {
     @Override
     public ResponseEntity examResultByStudentID(int studentID) {
         try {
-            Optional<ExamResult> examResult = examResultRepository.findByStudent(studentID);
-            ExamResultDescriptionDTO examResultDescriptionDTO = new ExamResultDescriptionDTO(
-                    examResult.get().getResultID(),
-                    examResult.get().getStudent().getFullName(),
-                    examResult.get().getTestType().getTestName(),
-                    examResult.get().getScore(),
-                    examResult.get().getPassScore(),
-                    examResult.get().isPassStatus()
-            );
-            return new ResponseEntity(
-                    new StandardResponse(200, "Exam results.",examResultDescriptionDTO),HttpStatus.OK);
+         return null;
         }catch (Exception e){
             log.error(e.getMessage());
             throw new InternalServerErrorException("Error occurred in get exam result.");
@@ -94,7 +84,7 @@ public class ExamResultServiceIMPL implements ExamResultService {
                     examResult.get().getStudent().getFullName(),
                     examResult.get().getTestType().getTestName(),
                     examResult.get().getScore(),
-                    examResult.get().getPassScore(),
+                    100.00,
                     examResult.get().isPassStatus()
             );
             return new ResponseEntity(
@@ -102,6 +92,21 @@ public class ExamResultServiceIMPL implements ExamResultService {
         }catch (Exception e){
             log.error(e.getMessage());
             throw new InternalServerErrorException("Error occurred in get exam result.");
+        }
+    }
+
+    @Override
+    public ResponseEntity removeResult(int resultID) {
+
+        try {
+            Optional<ExamResult> byId = examResultRepository.findById(resultID);
+            examResultRepository.delete(byId.get());
+            return new ResponseEntity(
+                    new StandardResponse(true, "Exam result deleted."),HttpStatus.OK);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred in get exam result.");
+
         }
     }
 }

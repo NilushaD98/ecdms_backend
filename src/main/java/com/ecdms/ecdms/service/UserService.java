@@ -22,4 +22,6 @@ public interface UserService {
     ResponseEntity updateTeacherByID(TeacherDTO teacherDTO);
 
     ResponseEntity removeTeacherByID(int teacherID);
+
+    ResponseEntity getStudentFullDetailsByID(int userID);
 }

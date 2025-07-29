@@ -51,7 +51,7 @@ public class AnnouncementServiceIMPL implements AnnouncementService {
 
     @Override
     public List<AnnouncementDTO> getAllAnnouncements(Integer userId) {
-        List<Announcement> announcements = announcementRepository.findAll();
+        List<Announcement> announcements = announcementRepository.findAllOrderByDate();
         return announcements.stream()
                 .map(announcement -> {
                     List<PostComment> byAnnouncement = postCommentRepository.findByAnnouncement(announcement);

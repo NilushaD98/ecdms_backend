@@ -54,4 +54,10 @@ public class UserController {
     public ResponseEntity removeTeacherByID(@RequestParam("teacherID")int teacherID){
         return userService.removeTeacherByID(teacherID);
     }
+
+        @GetMapping("/get-student-full-details-by-id")
+    public ResponseEntity getStudentFullDetailsByID(@RequestParam("userID") int userID){
+        log.info(""+userID);
+        return userService.getStudentFullDetailsByID(userID);
+    }
 }

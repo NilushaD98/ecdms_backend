@@ -10,9 +10,10 @@ import java.util.Date;
 @NoArgsConstructor
 @Data
 public class AppointmentDTO {
-    private String appointmentId;
-    private Integer studentID;
-    private String reason;
-    private Date scheduledTime;
-    private boolean confirmed;
+        private Integer appointmentId;
+        private Integer studentID;
+        private String studentName;
+        private String reason;
+        private Date scheduledTime;
+        private boolean confirmed;
 }

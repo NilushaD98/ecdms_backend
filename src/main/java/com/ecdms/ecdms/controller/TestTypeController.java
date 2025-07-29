@@ -35,4 +35,10 @@ public class TestTypeController {
     public ResponseEntity removeTestTypeByID(@RequestParam("testTypeID") int testTypeID){
         return testTypeService.removeTestTypeByID(testTypeID);
     }
+
+    @GetMapping("/get-test-type-all-details-by-id")
+    public ResponseEntity getTestTypeAllDetailsByID(@RequestParam("testTypeID") int testTypeID){
+        return testTypeService.getTestTypeAllDetailsByID(testTypeID);
+
+    }
 }

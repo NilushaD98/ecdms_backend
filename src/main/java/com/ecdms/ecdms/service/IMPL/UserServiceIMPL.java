@@ -2,7 +2,12 @@ package com.ecdms.ecdms.service.IMPL;
 
 import com.ecdms.ecdms.dto.common.StandardResponse;
 import com.ecdms.ecdms.dto.request.AddStudentDTO;
+import com.ecdms.ecdms.dto.request.AllSpecialNoticeDTO;
+import com.ecdms.ecdms.dto.request.AttendanceDTO;
 import com.ecdms.ecdms.dto.request.TeacherDTO;
+import com.ecdms.ecdms.dto.response.PaymentDTO;
+import com.ecdms.ecdms.dto.response.StudentDetailsDTO;
+import com.ecdms.ecdms.dto.response.TestResultsDTO;
 import com.ecdms.ecdms.entity.*;
 import com.ecdms.ecdms.enums.Status;
 import com.ecdms.ecdms.exceptions.InternalServerErrorException;
@@ -37,6 +42,11 @@ public class UserServiceIMPL implements UserService {
     private final TeacherRepository teacherRepository;
     private final ClassroomRepository classroomRepository;
     private final PaymentService paymentService;
+    private final SpecialNoticeRepository specialNoticeRepository;
+    private final SpecialNoticeUserRepository specialNoticeUserRepository;
+    private final ExamResultRepository examResultRepository;
+    private final PaymentRepository paymentRepository;
+    private final AttendanceRepository attendanceRepository;
     @Override
     public ResponseEntity addStudent(AddStudentDTO addStudentDTO) {
         try {
@@ -326,6 +336,92 @@ public class UserServiceIMPL implements UserService {
         userRepository.delete(byUsernameEquals.get());
         teacherRepository.deleteById(teacherID);
         return new ResponseEntity<>(new StandardResponse(true,"Teacher removed successfully."),HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity getStudentFullDetailsByID(int userID) {
+
+        try {
+            Optional<Student> byId = studentRepository.findById(userID);
+            StudentDetailsDTO studentDetailsDTO = new StudentDetailsDTO();
+            studentDetailsDTO.setFullName(byId.get().getFullName());
+            studentDetailsDTO.setDob(byId.get().getDob());
+            studentDetailsDTO.setProgramme(
+                    byId.get().getProgram().equals("ecd")?"ECD Center":
+                            byId.get().getProgram().equals("dc")?"Daycare Center":
+                                    byId.get().getProgram().equals("ecddc")?"ECD & Daycare Center":""
+            );
+            studentDetailsDTO.setGender(byId.get().getGender());
+            studentDetailsDTO.setAllergies(byId.get().getAllergies());
+            studentDetailsDTO.setSpecialNotice(byId.get().getSpecialNotice());
+            studentDetailsDTO.setParentName(byId.get().getFullNameParent());
+            studentDetailsDTO.setRelationship(byId.get().getRelationship());
+            studentDetailsDTO.setEmail(byId.get().getEmail());
+            studentDetailsDTO.setContact1(byId.get().getContactOne());
+            studentDetailsDTO.setContactTwo(byId.get().getContactTwo());
+
+            List<ExamResult> examResults = examResultRepository.findByStudent(userID);
+            List<TestResultsDTO> testResultsDTOList = new ArrayList<>();
+            for(ExamResult examResult:examResults){
+                TestResultsDTO testResultsDTO = new TestResultsDTO(
+                        examResult.getTestType().getTestName(),
+                        examResult.getScore(),
+                        examResult.isPassStatus(),
+                        100.00
+                );
+                testResultsDTOList.add(testResultsDTO);
+            }
+            studentDetailsDTO.setTestResultsDTOList(testResultsDTOList);
+
+            List<SpecialNoticeUser> specialNoticeUserList = specialNoticeUserRepository.findByUser(userID);
+            List<AllSpecialNoticeDTO> allSpecialNoticeDTOList = new ArrayList<>();
+            for(SpecialNoticeUser specialNoticeUser: specialNoticeUserList){
+                Optional<SpecialNotice> specialNotice = specialNoticeRepository.findById(specialNoticeUser.getSpecialNotice());
+                AllSpecialNoticeDTO allSpecialNoticeDTO = new AllSpecialNoticeDTO(
+                        specialNotice.get().getSpecialNoticeID(),
+                        specialNotice.get().getMessage(),
+                        specialNotice.get().getMediaLink(),
+                        null
+                );
+                allSpecialNoticeDTOList.add(allSpecialNoticeDTO);
+            }
+            studentDetailsDTO.setAllSpecialNoticeDTOList(allSpecialNoticeDTOList);
+
+            List<Payment> paymentList = paymentRepository.findByUserID(userID);
+            List<PaymentDTO> paymentDTOList = new ArrayList<>();
+            for (Payment payment:paymentList) {
+                PaymentDTO paymentDTO = new PaymentDTO(
+                        payment.getPaymentId(),
+                        payment.getType(),
+                        payment.getAmount(),
+                        payment.getDueDate(),
+                        payment.getPaidDate(),
+                        payment.isPaid()
+                );
+                paymentDTOList.add(paymentDTO);
+            }
+            studentDetailsDTO.setPaymentDTOList(paymentDTOList);
+
+
+            List<Attendance> attendanceList = attendanceRepository.findByUser(userID);
+            List<AttendanceDTO> attendanceDTOList = new ArrayList<>();
+            for(Attendance attendance:attendanceList){
+                AttendanceDTO attendanceDTO = new AttendanceDTO(
+                        attendance.getAttendanceID(),
+                        attendance.getDate(),
+                        attendance.isPresent(),
+                        attendance.getRemarks()
+                );
+                attendanceDTOList.add(attendanceDTO);
+            }
+            studentDetailsDTO.setAttendanceDTOList(attendanceDTOList);
+
+            return new ResponseEntity<>(new StandardResponse(200,"",studentDetailsDTO),HttpStatus.OK);
+
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred.");
+        }
     }
 
     public boolean mailSender(String toMail, String subject, String body){

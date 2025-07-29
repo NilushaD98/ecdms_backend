@@ -25,12 +25,13 @@ public class ExamResultController {
     public ResponseEntity editExamResult(@RequestBody ExamResultDTO examResultDTO){
         return examResultService.editExamResult(examResultDTO);
     }
-    @GetMapping("/exam-result-by-student-id")
-    public ResponseEntity examResultByStudentID(@RequestParam("studentID")int StudentID){
-        return examResultService.examResultByStudentID(StudentID);
-    }
     @GetMapping("/exam-result-by-test-id")
     public ResponseEntity examResultByTestID(@RequestParam("testID")int testID){
         return examResultService.examResultByTestID(testID);
+    }
+
+    @DeleteMapping("/remove-result")
+    public ResponseEntity removeResult(@RequestParam("resultID")int resultID){
+        return examResultService.removeResult(resultID);
     }
 }

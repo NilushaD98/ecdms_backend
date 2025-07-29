@@ -30,4 +30,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance,Integer> 
     @Query("SELECT a FROM Attendance a " +
             "WHERE a.teacher.teacherID=:teacher AND DATE(a.date) = DATE(:targetDate)")
     Optional<Attendance> findByTeacherAndDate(@Param("teacher")Integer teacher,@Param("targetDate") Date date);
+    @Query("SELECT a FROM Attendance a " +
+            "WHERE a.student.stuID=:student")
+    List<Attendance> findByUser(@Param("student")Integer student);
 }
