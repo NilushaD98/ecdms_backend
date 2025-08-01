@@ -35,6 +35,7 @@ public class ExamResultServiceIMPL implements ExamResultService {
                     new TestType(examResultDTO.getTestType()),
                     examResultDTO.getScore(),
                     examResultDTO.getPassScore(),
+                    examResultDTO.getMaxScore(),
                     examResultDTO.getScore()>examResultDTO.getPassScore()
             );
             examResultRepository.save(examResult);
@@ -84,7 +85,7 @@ public class ExamResultServiceIMPL implements ExamResultService {
                     examResult.get().getStudent().getFullName(),
                     examResult.get().getTestType().getTestName(),
                     examResult.get().getScore(),
-                    100.00,
+                    examResult.get().getMaxScore()  ,
                     examResult.get().isPassStatus()
             );
             return new ResponseEntity(

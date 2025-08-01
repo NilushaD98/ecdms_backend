@@ -2,6 +2,7 @@ package com.ecdms.ecdms.service;
 
 import com.ecdms.ecdms.dto.request.AddStudentDTO;
 import com.ecdms.ecdms.dto.request.TeacherDTO;
+import com.ecdms.ecdms.dto.request.UpdateStudentDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService {
@@ -24,4 +25,6 @@ public interface UserService {
     ResponseEntity removeTeacherByID(int teacherID);
 
     ResponseEntity getStudentFullDetailsByID(int userID);
+
+    ResponseEntity updateStudentByParent(UpdateStudentDTO updateStudentDTO);
 }

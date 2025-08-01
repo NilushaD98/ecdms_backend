@@ -23,13 +23,15 @@ public class ExamResult {
     private TestType testType;
     private double score;
     private double passScore;
+    private double maxScore;
     private boolean passStatus;
 
-    public ExamResult(Student student, TestType testType, double score, double passScore, boolean passStatus) {
+    public ExamResult(Student student, TestType testType, double score, double passScore,double maxScore, boolean passStatus) {
         this.student = student;
         this.testType = testType;
         this.score = score;
         this.passScore = passScore;
+        this.maxScore = maxScore;
         this.passStatus = passStatus;
     }
 }

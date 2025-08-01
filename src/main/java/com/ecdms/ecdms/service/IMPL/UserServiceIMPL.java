@@ -1,10 +1,7 @@
 package com.ecdms.ecdms.service.IMPL;
 
 import com.ecdms.ecdms.dto.common.StandardResponse;
-import com.ecdms.ecdms.dto.request.AddStudentDTO;
-import com.ecdms.ecdms.dto.request.AllSpecialNoticeDTO;
-import com.ecdms.ecdms.dto.request.AttendanceDTO;
-import com.ecdms.ecdms.dto.request.TeacherDTO;
+import com.ecdms.ecdms.dto.request.*;
 import com.ecdms.ecdms.dto.response.PaymentDTO;
 import com.ecdms.ecdms.dto.response.StudentDetailsDTO;
 import com.ecdms.ecdms.dto.response.TestResultsDTO;
@@ -422,6 +419,26 @@ public class UserServiceIMPL implements UserService {
             log.error(e.getMessage());
             throw new InternalServerErrorException("Error occurred.");
         }
+    }
+
+    @Override
+    public ResponseEntity updateStudentByParent(UpdateStudentDTO updateStudentDTO) {
+        try {
+            Optional<Student> byId = studentRepository.findById(updateStudentDTO.getUserID());
+            byId.get().setAllergies(updateStudentDTO.getAllergies());
+            byId.get().setSpecialNotice(updateStudentDTO.getSpecialNotice());
+            byId.get().setContactOne(updateStudentDTO.getContactOne());
+            byId.get().setContactTwo(updateStudentDTO.getContactTwo());
+
+            studentRepository.save(byId.get());
+
+            return new ResponseEntity(new StandardResponse(true,"Updated."),HttpStatus.OK);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred.");
+
+        }
+
     }
 
     public boolean mailSender(String toMail, String subject, String body){

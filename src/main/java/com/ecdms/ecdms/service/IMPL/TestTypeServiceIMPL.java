@@ -105,7 +105,7 @@ public class TestTypeServiceIMPL implements TestTypeService {
                         examResult.getResultID(),
                         examResult.getStudent().getFullName(),
                         examResult.getScore(),
-                        examResult.getPassScore(),
+                        examResult.getMaxScore(),
                         examResult.isPassStatus()
                 );
                 examResultDetailsDTOS.add(examResultDetailsDTO);

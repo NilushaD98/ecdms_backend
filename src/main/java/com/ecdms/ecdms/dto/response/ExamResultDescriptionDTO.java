@@ -13,6 +13,6 @@ public class ExamResultDescriptionDTO {
     private String  student;
     private String testType;
     private double score;
-    private double passScore;
+    private double maxScore;
     private boolean passStatus;
 }

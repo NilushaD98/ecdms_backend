@@ -2,6 +2,7 @@ package com.ecdms.ecdms.controller;
 
 import com.ecdms.ecdms.dto.request.AddStudentDTO;
 import com.ecdms.ecdms.dto.request.TeacherDTO;
+import com.ecdms.ecdms.dto.request.UpdateStudentDTO;
 import com.ecdms.ecdms.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,5 +60,10 @@ public class UserController {
     public ResponseEntity getStudentFullDetailsByID(@RequestParam("userID") int userID){
         log.info(""+userID);
         return userService.getStudentFullDetailsByID(userID);
+    }
+
+    @PostMapping("/update-student-by-parent")
+    public ResponseEntity updateStudentByParent(@RequestBody UpdateStudentDTO updateStudentDTO){
+        return userService.updateStudentByParent(updateStudentDTO);
     }
 }
