@@ -62,8 +62,18 @@ public class UserController {
         return userService.getStudentFullDetailsByID(userID);
     }
 
+    @GetMapping("/get-teacher-full-details-by-id")
+    public ResponseEntity getTeacherFullDetailsByID(@RequestParam("userID") int userID){
+        return userService.getTeacherFullDetailsByID(userID);
+    }
+
     @PostMapping("/update-student-by-parent")
     public ResponseEntity updateStudentByParent(@RequestBody UpdateStudentDTO updateStudentDTO){
         return userService.updateStudentByParent(updateStudentDTO);
+    }
+
+    @GetMapping("/get-teacher-by-id")
+    public ResponseEntity getTeacherById(@RequestParam("teacherID") int teacherID){
+        return userService.getTeacherById(teacherID);
     }
 }

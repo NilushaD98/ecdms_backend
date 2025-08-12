@@ -412,7 +412,6 @@ public class UserServiceIMPL implements UserService {
                 attendanceDTOList.add(attendanceDTO);
             }
             studentDetailsDTO.setAttendanceDTOList(attendanceDTOList);
-
             return new ResponseEntity<>(new StandardResponse(200,"",studentDetailsDTO),HttpStatus.OK);
 
         }catch (Exception e){
@@ -429,8 +428,22 @@ public class UserServiceIMPL implements UserService {
             byId.get().setSpecialNotice(updateStudentDTO.getSpecialNotice());
             byId.get().setContactOne(updateStudentDTO.getContactOne());
             byId.get().setContactTwo(updateStudentDTO.getContactTwo());
-
             studentRepository.save(byId.get());
+
+            String studentName = byId.get().getFirstName() + " " + byId.get().getLastName();
+            String className = byId.get().getClassroom().getClassName() != null ? byId.get().getClassroom().getClassName() : "Unassigned";
+
+            String subject = "Parent Update Notification";
+            String message = "Dear Teacher,\n\n"
+                    + "This is to inform you that the parent of student **" + studentName + "** "
+                    + "(Class: " + className + ") has updated their contact or health information.\n\n"
+                    + "Please be aware of this update for any communication or care needs.\n\n"
+                    + "Thank you,\n"
+                    + "ECDMS System";
+            List<Teacher> teachers = teacherRepository.findAll();
+            for (Teacher teacher : teachers) {
+                mailSender(teacher.getEmail(), subject, message);
+            }
 
             return new ResponseEntity(new StandardResponse(true,"Updated."),HttpStatus.OK);
         }catch (Exception e){
@@ -439,6 +452,61 @@ public class UserServiceIMPL implements UserService {
 
         }
 
+    }
+    @Override
+    public ResponseEntity getTeacherFullDetailsByID(int userID) {
+        try {
+            Optional<Teacher> byId = teacherRepository.findById(userID);
+            Teacher teacher = byId.get();
+            List<Classroom> classrooms = teacher.getClassrooms();
+            List<Integer> classRoomIDList = new ArrayList<>();
+            for(Classroom classroom:classrooms){
+                classRoomIDList.add(classroom.getClassID());
+            }
+            TeacherDTO teacherDTO = new TeacherDTO(
+                    teacher.getTeacherID(),
+                    teacher.getFullName(),
+                    teacher.getContact(),
+                    teacher.getNic(),
+                    teacher.getDob(),
+                    teacher.getEmail(),
+                    teacher.getGender(),
+                    teacher.getAddress(),
+                    teacher.getSalary(),
+                    teacher.getJoiningDate(),
+                    classRoomIDList
+            );
+
+
+            List<Attendance> attendanceList = attendanceRepository.findByUser(userID);
+            List<AttendanceDTO> attendanceDTOList = new ArrayList<>();
+            for(Attendance attendance:attendanceList){
+                AttendanceDTO attendanceDTO = new AttendanceDTO(
+                        attendance.getAttendanceID(),
+                        attendance.getDate(),
+                        attendance.isPresent(),
+                        attendance.getRemarks()
+                );
+                attendanceDTOList.add(attendanceDTO);
+            }
+            teacherDTO.setAttendanceDTOList(attendanceDTOList);
+            return new ResponseEntity<>(new StandardResponse(200,"",teacherDTO),HttpStatus.OK);
+
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred.");
+        }
+    }
+
+    @Override
+    public ResponseEntity getTeacherById(int teacherID) {
+        try {
+            Optional<Teacher> byId = teacherRepository.findById(teacherID);
+            return null;
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred.");
+        }
     }
 
     public boolean mailSender(String toMail, String subject, String body){

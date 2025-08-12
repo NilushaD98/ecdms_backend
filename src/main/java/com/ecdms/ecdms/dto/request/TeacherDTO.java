@@ -24,4 +24,19 @@ public class TeacherDTO {
     private double salary;
     private Date joiningDate;
     private List<Integer> classroomList= new ArrayList<>();
+    private List<AttendanceDTO> attendanceDTOList;
+
+    public TeacherDTO(Integer teacherID, String fullName, String contact, String nic, Date dob, String email, String gender, String address, double salary, Date joiningDate, List<Integer> classroomList) {
+        this.teacherID = teacherID;
+        this.fullName = fullName;
+        this.contact = contact;
+        this.nic = nic;
+        this.dob = dob;
+        this.email = email;
+        this.gender = gender;
+        this.address = address;
+        this.salary = salary;
+        this.joiningDate = joiningDate;
+        this.classroomList = classroomList;
+    }
 }

@@ -27,4 +27,8 @@ public interface UserService {
     ResponseEntity getStudentFullDetailsByID(int userID);
 
     ResponseEntity updateStudentByParent(UpdateStudentDTO updateStudentDTO);
+
+    ResponseEntity getTeacherFullDetailsByID(int userID);
+
+    ResponseEntity getTeacherById(int teacherID);
 }
