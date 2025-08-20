@@ -18,6 +18,7 @@ public class SpecialNoticeController {
     private final SpecialNoticeService specialNoticeService;
     @PostMapping("/add_special_notice")
     public ResponseEntity addSpecialNotice(@RequestBody AddSpecialNoticeDTO addSpecialNoticeDTO){
+
         return specialNoticeService.addSpecialNotice(addSpecialNoticeDTO);
     }
 

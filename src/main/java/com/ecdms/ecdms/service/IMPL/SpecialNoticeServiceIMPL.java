@@ -4,16 +4,20 @@ import com.ecdms.ecdms.dto.common.StandardResponse;
 import com.ecdms.ecdms.dto.request.AddSpecialNoticeDTO;
 import com.ecdms.ecdms.dto.request.AllSpecialNoticeDTO;
 import com.ecdms.ecdms.dto.request.NoticesRequestDTO;
+import com.ecdms.ecdms.entity.Notification;
 import com.ecdms.ecdms.entity.SpecialNotice;
 import com.ecdms.ecdms.entity.SpecialNoticeUser;
 import com.ecdms.ecdms.entity.Student;
 import com.ecdms.ecdms.exceptions.InternalServerErrorException;
+import com.ecdms.ecdms.repository.NotificationRepository;
 import com.ecdms.ecdms.repository.SpecialNoticeRepository;
 import com.ecdms.ecdms.repository.SpecialNoticeUserRepository;
 import com.ecdms.ecdms.repository.StudentRepository;
+import com.ecdms.ecdms.service.NotificationService;
 import com.ecdms.ecdms.service.SpecialNoticeService;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
@@ -35,6 +39,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Builder
 public class SpecialNoticeServiceIMPL implements SpecialNoticeService {
 
 
@@ -42,6 +47,10 @@ public class SpecialNoticeServiceIMPL implements SpecialNoticeService {
     private final SpecialNoticeUserRepository specialNoticeUserRepository;
     private final StudentRepository studentRepository;
     private final JavaMailSender mailSender;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
+
+
     @Override
     public ResponseEntity addSpecialNotice(AddSpecialNoticeDTO addSpecialNoticeDTO) {
         try {
@@ -72,6 +81,15 @@ public class SpecialNoticeServiceIMPL implements SpecialNoticeService {
                 );
                 if (success) {
                     log.info("Sent notice to: " + student.getEmail());
+                    Notification notification  = new Notification(
+                            student.getStuID(),
+                            specialNotice.getMessage(),
+                            false
+                    );
+                    notificationRepository.save(notification);
+                    notificationService.sendNotification(student.getEmail(),
+                            notification);
+
                 }
             }
             return new ResponseEntity(new StandardResponse(true,"Notice added"), HttpStatus.OK);

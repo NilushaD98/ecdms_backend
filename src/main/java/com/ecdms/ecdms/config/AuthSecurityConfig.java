@@ -10,15 +10,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+
+import java.security.Principal;
+import java.util.Map;
 
 /**
  * Authentication Service Security Configuration
@@ -52,7 +60,7 @@ public class AuthSecurityConfig {
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
 //                .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.disable())
                 .authorizeHttpRequests(
-                        req -> req.requestMatchers("/**").permitAll()
+                        req -> req.requestMatchers("/**","/ws/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
@@ -87,4 +95,22 @@ public class AuthSecurityConfig {
     }
 
 
+    @Bean
+    public DefaultHandshakeHandler handshakeHandler() {
+        return new DefaultHandshakeHandler() {
+            @Override
+            protected Principal determineUser(ServerHttpRequest request,
+                                              WebSocketHandler wsHandler,
+                                              Map<String, Object> attributes) {
+                // Extract user from JWT and set as Principal
+                Object userObj = attributes.get("user");
+                if (userObj instanceof UserDetails) {
+                    UserDetails userDetails = (UserDetails) userObj;
+                    return new UsernamePasswordAuthenticationToken(
+                            userDetails.getUsername(), null, userDetails.getAuthorities());
+                }
+                return null;
+            }
+        };
+    }
 }

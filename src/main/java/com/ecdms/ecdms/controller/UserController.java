@@ -72,8 +72,8 @@ public class UserController {
         return userService.updateStudentByParent(updateStudentDTO);
     }
 
-    @GetMapping("/get-teacher-by-id")
-    public ResponseEntity getTeacherById(@RequestParam("teacherID") int teacherID){
-        return userService.getTeacherById(teacherID);
-    }
+//    @GetMapping("/get-teacher-by-id")
+//    public ResponseEntity getTeacherById(@RequestParam("teacherID") int teacherID){
+//        return userService.getTeacherById(teacherID);
+//    }
 }

@@ -52,7 +52,7 @@ public class AuthServiceIMPL implements AuthService {
             Optional<Teacher> optionalTeacher = teacherRepository.findByEmail(loginDTO.getUsername());
 
             if(byEmailEquals.isPresent()){
-                userType = "STUDENT";
+                userType = "PARENT";
                 userID = byEmailEquals.get().getStuID();
             }else if (optionalTeacher.isPresent()){
                 userType = "TEACHER";

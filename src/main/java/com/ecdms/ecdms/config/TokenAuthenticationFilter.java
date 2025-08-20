@@ -47,36 +47,40 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            if(
-                    request.getServletPath().equals("/auth/login")
-            ){
-                filterChain.doFilter(request,response);
+            String path = request.getServletPath();
+            if ("/auth/login".equals(path) || path.startsWith("/ws/")) {
+                filterChain.doFilter(request, response);
                 return;
             }
 
-            Optional<TokenHistory> tokenHistoryByTokenUUIDEquals = tokenHistoryRepository.findTokenHistoryByTokenUUIDEquals(getJwtFromRequest(request));
-            log.info(""+tokenHistoryByTokenUUIDEquals.isPresent());
-            if (!tokenHistoryByTokenUUIDEquals.isPresent()){
+            String tokenUuid = getJwtFromRequest(request);
+            Optional<TokenHistory> tokenHistoryOpt = tokenHistoryRepository.findTokenHistoryByTokenUUIDEquals(tokenUuid);
+
+            if (!tokenHistoryOpt.isPresent()) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                StandardResponse failureResponse = new StandardResponse(false,"Unauthorized");
-                try {
-                    writeJsonResponse(response, failureResponse);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+                StandardResponse failureResponse = new StandardResponse(false, "Unauthorized");
+                writeJsonResponse(response, failureResponse);
+                return; // Stop processing
             }
-            String jwt = tokenHistoryByTokenUUIDEquals.get().getToken();
+
+            String jwt = tokenHistoryOpt.get().getToken();
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                UserDetails userDetails = tokenHistoryByTokenUUIDEquals.get().getUser();
+                UserDetails userDetails = tokenHistoryOpt.get().getUser();
                 AuthorizedUserContext.setUser(userDetails.getUsername());
-                UsernamePasswordAuthenticationToken authentication
-                        = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            }else {
             }
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            try {
+                writeJsonResponse(response, new StandardResponse(false, "Internal Server Error"));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return;
         }
 
         filterChain.doFilter(request, response);
@@ -89,21 +93,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
      * @return Token extracted from the request
      */
     private String getJwtFromRequest(HttpServletRequest request) {
-        log.info(""+request);
         String bearerToken = request.getHeader("Authorization");
-        log.info("Raw Authorization Header: {}",bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            log.info("token = "+ bearerToken.substring(7));
             return bearerToken.substring(7);
-        }
-        if(StringUtils.hasText(request.getHeader("Authorization")) && request.getHeader("Authorization").startsWith("Bearer ")){
-            return request.getHeader("Authorization").substring(7);
         }
         return null;
     }
     private void writeJsonResponse(HttpServletResponse response, Object dto) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper(); // Jackson ObjectMapper
-        response.setContentType("application/json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(dto));
+        response.getWriter().flush();
     }
 }
