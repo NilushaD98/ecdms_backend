@@ -30,8 +30,10 @@ public class AnnouncementController {
     }
 
     @GetMapping("/get-all-announcements")
-    public ResponseEntity<List<AnnouncementDTO>> getAllAnnouncements(@AuthenticationPrincipal User user) {
-        List<AnnouncementDTO> announcements = announcementService.getAllAnnouncements(user.getUserId());
+    public ResponseEntity<List<AnnouncementDTO>> getAllAnnouncements(
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false) String userType) {
+        List<AnnouncementDTO> announcements = announcementService.getAllAnnouncements(user.getUserId(), userType);
         return ResponseEntity.ok(announcements);
     }
 

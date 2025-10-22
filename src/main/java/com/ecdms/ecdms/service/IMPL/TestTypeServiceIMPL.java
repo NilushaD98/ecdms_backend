@@ -36,7 +36,8 @@ public class TestTypeServiceIMPL implements TestTypeService {
         TestType testType = new TestType(
                 testTypeDTO.getTestName(),
                 testTypeDTO.getDescription(),
-                testTypeDTO.getTestDate()
+                testTypeDTO.getTestDate(),
+                testTypeDTO.getTestClass()
         );
         System.out.println(testType.getTestDate());
         testTypeRepository.save(testType);
@@ -53,15 +54,21 @@ public class TestTypeServiceIMPL implements TestTypeService {
     }
 
     @Override
-    public ResponseEntity getAllTestTypes() {
-        List<TestType> all = testTypeRepository.findAll();
+    public ResponseEntity getAllTestTypes(int testClass) {
+        List<TestType> all;
+        if (testClass >0){
+            all = testTypeRepository.findAllTestClassEquals(testClass);
+        }else {
+            all = testTypeRepository.findAll();
+        }
         List<TestTypeDTO> testTypeDTOList = new ArrayList<>();
         for(TestType testType:all){
             TestTypeDTO testTypeDTO = new TestTypeDTO(
                     testType.getTestTypeID(),
                     testType.getTestName(),
                     testType.getDescription(),
-                    testType.getTestDate()
+                    testType.getTestDate(),
+                    testType.getTestClass()
             );
             testTypeDTOList.add(testTypeDTO);
         }
@@ -76,7 +83,8 @@ public class TestTypeServiceIMPL implements TestTypeService {
                 byId.get().getTestTypeID(),
                 byId.get().getTestName(),
                 byId.get().getDescription(),
-                byId.get().getTestDate()
+                byId.get().getTestDate(),
+                byId.get().getTestClass()
         );
         return new ResponseEntity(new StandardResponse(200,"Test Type by ID.",testTypeDTO), HttpStatus.OK);
     }
@@ -96,7 +104,8 @@ public class TestTypeServiceIMPL implements TestTypeService {
                     byId.get().getTestTypeID(),
                     byId.get().getTestName(),
                     byId.get().getDescription(),
-                    byId.get().getTestDate()
+                    byId.get().getTestDate(),
+                    byId.get().getTestClass()
             );
             List<ExamResult> examResults = byId.get().getExamResults();
             List<ExamResultDetailsDTO> examResultDetailsDTOS = new ArrayList<>();

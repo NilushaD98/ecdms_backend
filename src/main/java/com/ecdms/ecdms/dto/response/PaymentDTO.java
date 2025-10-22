@@ -16,5 +16,7 @@ public class PaymentDTO {
     private double amount;
     private Date dueDate;
     private Date paidDate;
+    private Boolean isPendingApprove;
     private boolean paid;
+    private String paymentReceipt;
 }

@@ -20,6 +20,7 @@ public class Attendance {
     private Date date;
     private boolean present;
     private String remarks;
+    private String classType;
     @ManyToOne
     @JoinColumn(name = "studentID")
     private Student student;

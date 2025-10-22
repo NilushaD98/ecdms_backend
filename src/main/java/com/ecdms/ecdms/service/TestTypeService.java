@@ -8,7 +8,7 @@ public interface TestTypeService {
 
     ResponseEntity updateTestType(TestTypeDTO testTypeDTO);
 
-    ResponseEntity getAllTestTypes();
+    ResponseEntity getAllTestTypes(int testClass);
 
     ResponseEntity getTestTypeByID(int testTypeID);
 

@@ -1,6 +1,7 @@
 package com.ecdms.ecdms.service;
 
 import com.ecdms.ecdms.dto.request.PaymentFilterDTO;
+import com.ecdms.ecdms.dto.request.PaymentReceiptDTO;
 import com.ecdms.ecdms.dto.response.PaymentDTO;
 import org.springframework.http.ResponseEntity;
 
@@ -11,4 +12,8 @@ public interface PaymentService {
     ResponseEntity getPayments(PaymentFilterDTO paymentFilterDTO);
 
     ResponseEntity makePayment(PaymentDTO paymentDTO);
+
+    ResponseEntity submitPayment(PaymentReceiptDTO paymentReceiptDTO);
+
+    ResponseEntity rejectPayment(PaymentDTO paymentDTO);
 }

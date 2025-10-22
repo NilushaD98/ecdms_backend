@@ -1,6 +1,7 @@
 package com.ecdms.ecdms.controller;
 
 import com.ecdms.ecdms.dto.request.PaymentFilterDTO;
+import com.ecdms.ecdms.dto.request.PaymentReceiptDTO;
 import com.ecdms.ecdms.dto.response.PaymentDTO;
 import com.ecdms.ecdms.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +24,16 @@ public class PaymentController {
         return paymentService.getPayments(paymentFilterDTO);
     }
 
+    @PostMapping("/payment-submit")
+    public ResponseEntity submitPayment(@RequestBody PaymentReceiptDTO paymentReceiptDTO){
+        return paymentService.submitPayment(paymentReceiptDTO);
+    }
     @PostMapping("/make-payment")
     public ResponseEntity makePayment(@RequestBody PaymentDTO paymentDTO){
         return paymentService.makePayment(paymentDTO);
+    }
+    @PostMapping("/reject-payment")
+    public ResponseEntity rejectPayment(@RequestBody PaymentDTO paymentDTO){
+        return paymentService.rejectPayment(paymentDTO);
     }
 }

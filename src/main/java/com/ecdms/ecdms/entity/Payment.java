@@ -23,6 +23,7 @@ public class Payment {
     private Date dueDate;
     private Date paidDate;
     private boolean paid;
+    private String paymentReceipt;
 
     public Payment(Integer paymentId, Integer userId, String type, double amount, Date dueDate, boolean paid) {
         this.paymentId = paymentId;

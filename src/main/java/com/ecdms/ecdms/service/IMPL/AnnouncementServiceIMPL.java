@@ -28,6 +28,7 @@ public class AnnouncementServiceIMPL implements AnnouncementService {
     private final PostCommentRepository postCommentRepository;
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
+    private final ClassroomRepository classroomRepository;
 
 
     @Override
@@ -38,8 +39,9 @@ public class AnnouncementServiceIMPL implements AnnouncementService {
         announcement.setPostDate(new Date());
         announcement.setLikeCount(0);
         announcement.setCommentCount(0);
+        List<Classroom> allById = classroomRepository.findAllById(announcementDTO.getClassroomList());
+        announcement.setClassrooms(allById);
         announcement = announcementRepository.save(announcement);
-
         return mapToDTO(announcement);
     }
     @Override
@@ -50,8 +52,26 @@ public class AnnouncementServiceIMPL implements AnnouncementService {
     }
 
     @Override
-    public List<AnnouncementDTO> getAllAnnouncements(Integer userId) {
-        List<Announcement> announcements = announcementRepository.findAllOrderByDate();
+    public List<AnnouncementDTO> getAllAnnouncements(Integer userId, String userType) {
+        List<Announcement> announcements;
+        Optional<User> byId = userRepository.findById(userId);
+        if ("PARENT".equals(userType)) {
+            Optional<Student> student = studentRepository.findByEmail(byId.get().getUsername());
+            if (student.isPresent()) {
+                String ageCategory = student.get().getAgeCategory();
+                Optional<Classroom> classroom = classroomRepository.findById(Integer.parseInt(ageCategory));
+                if (classroom.isPresent()) {
+                    announcements = announcementRepository.findByClassroomsContaining(classroom.get());
+                } else {
+                    return List.of();
+                }
+            } else {
+                return List.of();
+            }
+        } else {
+            announcements = announcementRepository.findAllOrderByDate();
+        }
+        
         return announcements.stream()
                 .map(announcement -> {
                     List<PostComment> byAnnouncement = postCommentRepository.findByAnnouncement(announcement);

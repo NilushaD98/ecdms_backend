@@ -23,6 +23,10 @@ public class Classroom {
     @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Student> students;
 
+    public Classroom(int classID) {
+        this.classID = classID;
+    }
+
     @ManyToMany
     @JoinTable(
             name="classroom_teacher",
@@ -30,4 +34,7 @@ public class Classroom {
             inverseJoinColumns = @JoinColumn(name="teacher_id")
     )
     private List<Teacher> teachers = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "classrooms")
+    private List<Announcement> announcements = new ArrayList<>();
 }

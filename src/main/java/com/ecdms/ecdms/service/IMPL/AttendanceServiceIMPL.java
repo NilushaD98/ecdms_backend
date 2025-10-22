@@ -33,8 +33,9 @@ public class AttendanceServiceIMPL implements AttendanceService {
     @Override
     public ResponseEntity studentAttendanceMark(AttendanceMarkDTO attendanceMarkDTO) {
         try {
-            Optional<Attendance> optionalAttendance = attendanceRepository.findByStudentAndDate(attendanceMarkDTO.getStudent(),attendanceMarkDTO.getDate());
+            Optional<Attendance> optionalAttendance = attendanceRepository.findByStudentAndDate(attendanceMarkDTO.getStudent(),attendanceMarkDTO.getDate(), attendanceMarkDTO.getType());
             if(optionalAttendance.isPresent()){
+                optionalAttendance.get().setClassType(attendanceMarkDTO.getType());
                 optionalAttendance.get().setPresent(attendanceMarkDTO.isPresent());
                 attendanceRepository.save(optionalAttendance.get());
             }else {
@@ -44,6 +45,7 @@ public class AttendanceServiceIMPL implements AttendanceService {
                         attendanceMarkDTO.getRemark(),
                         new Student(attendanceMarkDTO.getStudent())
                 );
+                attendance.setClassType(attendanceMarkDTO.getType());
                 attendanceRepository.save(attendance);
             }
 
@@ -83,24 +85,40 @@ public class AttendanceServiceIMPL implements AttendanceService {
     public ResponseEntity getAttendanceByDate(AttendanceRequestDTO attendanceRequestDTO) {
         try {
             List<AttendanceResponseDTO> attendanceResponseDTOS = new ArrayList<>();
-            List<Integer> studentIDsByDate = attendanceRepository.findStudentIDsByDate(attendanceRequestDTO.getAttendanceDate());
-            List<Student> all = studentRepository.findAll();
+            List<Integer> studentIDsByDate = new ArrayList<>();
+            List<Integer> studentIDsByDateAbsent = new ArrayList<>();
+            List<Student> all = new ArrayList<>();
 
-            int i = 1;
+            if(attendanceRequestDTO.getClassType() == 4){
+                studentIDsByDate = attendanceRepository.findStudentIDsByDate(attendanceRequestDTO.getAttendanceDate(),"day_care");
+                studentIDsByDateAbsent = attendanceRepository.findStudentIDsByDateAbsent(attendanceRequestDTO.getAttendanceDate(),"day_care");
+                all = studentRepository.findAllByAgeCategory();
+            } else {
+                studentIDsByDate = attendanceRepository.findStudentIDsByDate(attendanceRequestDTO.getAttendanceDate(),"ecd");
+                studentIDsByDateAbsent = attendanceRepository.findStudentIDsByDateAbsent(attendanceRequestDTO.getAttendanceDate(),"ecd");
+                all = studentRepository.findAllByAgeCategoryAndClassCategory(attendanceRequestDTO.getClassType());
+            }
             for(Student student:all){
-                boolean contains = studentIDsByDate.contains(student.getStuID());
+                Boolean presentStatus = null;
+                if(studentIDsByDate.contains(student.getStuID())){
+                    presentStatus = true;
+                } else if(studentIDsByDateAbsent.contains(student.getStuID())){
+                    presentStatus = false;
+                }
+                
                 AttendanceResponseDTO attendanceResponseDTO = new AttendanceResponseDTO(
                         student.getStuID(),
                         attendanceRequestDTO.getAttendanceDate(),
                         student.getFirstName()+" "+student.getLastName(),
-                            student.getProgram(),
-                        contains? true:false
-                        );
+                        student.getProgram(),
+                        presentStatus
+                );
                 attendanceResponseDTOS.add(attendanceResponseDTO);
             }
             return new ResponseEntity(new StandardResponse(200,"Attendance List",attendanceResponseDTOS),HttpStatus.OK);
         }catch (Exception e){
             log.error(e.getMessage());
+            e.printStackTrace();
             throw new InternalServerErrorException("Error occurred in get attendance by date.");
         }
     }

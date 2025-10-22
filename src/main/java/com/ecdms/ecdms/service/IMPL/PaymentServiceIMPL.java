@@ -2,6 +2,7 @@ package com.ecdms.ecdms.service.IMPL;
 
 import com.ecdms.ecdms.dto.common.StandardResponse;
 import com.ecdms.ecdms.dto.request.PaymentFilterDTO;
+import com.ecdms.ecdms.dto.request.PaymentReceiptDTO;
 import com.ecdms.ecdms.dto.response.PaymentDTO;
 import com.ecdms.ecdms.entity.Payment;
 import com.ecdms.ecdms.entity.Student;
@@ -57,17 +58,20 @@ public class PaymentServiceIMPL implements PaymentService {
             List<Payment> paymentList = paymentRepository.findByUserID(paymentFilterDTO.getStudentID());
             List<PaymentDTO> paymentDTOList = new ArrayList<>();
             for (Payment payment:paymentList){
+                Boolean isPendingApprove = (!payment.isPaid() && payment.getPaymentReceipt() != null) ? true : null;
                 PaymentDTO paymentDTO = new PaymentDTO(
                         payment.getPaymentId(),
                         payment.getType(),
                         payment.getAmount(),
                         payment.getDueDate(),
                         payment.getPaidDate(),
-                        payment.isPaid()
+                        isPendingApprove,
+                        payment.isPaid(),
+                        payment.getPaymentReceipt()
                 );
                 paymentDTOList.add(paymentDTO);
             }
-            return new ResponseEntity(new StandardResponse(200,"All Payments",paymentList), HttpStatus.OK);
+            return new ResponseEntity(new StandardResponse(200,"All Payments",paymentDTOList), HttpStatus.OK);
 
         }catch (Exception e){
             log.error(e.getMessage());
@@ -86,6 +90,51 @@ public class PaymentServiceIMPL implements PaymentService {
         }catch (Exception e){
             log.error(e.getMessage());
             throw new InternalServerErrorException("Error occurred in make payment.");
+        }
+    }
+
+    @Override
+    public ResponseEntity submitPayment(PaymentReceiptDTO paymentReceiptDTO) {
+        try {
+            Optional<Payment> paymentOpt = paymentRepository.findById(paymentReceiptDTO.getPaymentId());
+            if (paymentOpt.isPresent()) {
+                Payment payment = paymentOpt.get();
+                payment.setPaymentReceipt(paymentReceiptDTO.getReceiptUrl());
+                payment.setPaidDate(new Date());
+                paymentRepository.save(payment);
+                return new ResponseEntity(new StandardResponse(true, "Payment receipt submitted successfully."), HttpStatus.OK);
+            } else {
+                return new ResponseEntity(new StandardResponse(false, "Payment not found."), HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred in submit payment.");
+        }
+    }
+
+    @Override
+    public ResponseEntity rejectPayment(PaymentDTO paymentDTO) {
+        try {
+            Optional<Payment> byId = paymentRepository.findById(paymentDTO.getPaymentId());
+            if (byId.isPresent()){
+                byId.get().setPaymentReceipt(null);
+                paymentRepository.save(byId.get());
+            }
+            SimpleMailMessage message = new SimpleMailMessage();
+            String userEmail = getUserEmail(byId.get().getUserId()); // Replace with real lookup
+
+            message.setTo(userEmail);
+            message.setSubject("Payment Rejected.");
+            message.setText("Dear Parent,\n\n" +
+                    "This is a reminder that you paid payment of Rs." + byId.get().getAmount() +
+                    " for " + byId.get().getType() + " on " + formatDate(byId.get().getDueDate()) +"is rejected."+
+                    ".\n\nPlease make sure upload the more clear receipt or contact us.\n\nBest regards,\nMontessori Admin");
+
+            mailSender.send(message);
+            return new ResponseEntity(new StandardResponse(true,"Payment Rejected."),HttpStatus.OK);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new InternalServerErrorException("Error occurred in reject payment.");
         }
     }
 

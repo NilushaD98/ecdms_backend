@@ -15,6 +15,6 @@ public class AttendanceResponseDTO {
     private Date date;
     private String name;
     private String classType;
-    private boolean presentStatus;
+    private Boolean presentStatus;
 
 }

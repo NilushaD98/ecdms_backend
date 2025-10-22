@@ -24,8 +24,8 @@ public class TestTypeController {
         return testTypeService.updateTestType(testTypeDTO);
     }
     @GetMapping("/get-all-test-type")
-    public ResponseEntity getAllTestTypes(){
-        return testTypeService.getAllTestTypes();
+    public ResponseEntity getAllTestTypes(@RequestParam("testClass") int testClass){
+        return testTypeService.getAllTestTypes(testClass);
     }
     @GetMapping("/get-test-type-by-id")
     public ResponseEntity getTestTypeByID(@RequestParam("testTypeID") int testTypeID){

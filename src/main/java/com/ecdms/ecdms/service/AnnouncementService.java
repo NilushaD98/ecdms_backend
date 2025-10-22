@@ -8,7 +8,7 @@ public interface AnnouncementService {
     AnnouncementDTO createAnnouncement(AnnouncementDTO announcementDTO);
     AnnouncementDTO getAnnouncementById(int announcementID);
 
-    List<AnnouncementDTO> getAllAnnouncements(Integer userId);
+    List<AnnouncementDTO> getAllAnnouncements(Integer userId, String userType);
     AnnouncementDTO updateAnnouncement(int announcementID, AnnouncementDTO announcementDTO);
     void deleteAnnouncement(int announcementID);
 

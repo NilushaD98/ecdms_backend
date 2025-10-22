@@ -14,6 +14,7 @@ public class AttendanceMarkDTO {
     private Date date;
     private boolean present;
     private String remark;
+    private String type;
     private Integer student;
     private Integer teacher;
 }

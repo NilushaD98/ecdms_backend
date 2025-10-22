@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "announcement")
@@ -30,4 +31,12 @@ public class Announcement {
 
     @OneToMany(mappedBy = "announcement", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> likes;
+
+    @ManyToMany
+    @JoinTable(
+            name = "announcement_classroom",
+            joinColumns = @JoinColumn(name = "announcement_id"),
+            inverseJoinColumns = @JoinColumn(name = "class_id")
+    )
+    private List<Classroom> classrooms;
 }

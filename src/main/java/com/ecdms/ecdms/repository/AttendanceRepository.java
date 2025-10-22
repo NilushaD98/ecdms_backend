@@ -14,13 +14,13 @@ import java.util.Optional;
 public interface AttendanceRepository extends JpaRepository<Attendance,Integer> {
 
     @Query("SELECT DISTINCT a.student.stuID FROM Attendance a " +
-            "WHERE a.student IS NOT NULL AND DATE(a.date) = DATE(:targetDate) AND a.present=true")
-    List<Integer> findStudentIDsByDate(@Param("targetDate") Date targetDate);
+            "WHERE a.student IS NOT NULL AND DATE(a.date) = DATE(:targetDate) AND a.classType= :type AND a.present=true")
+    List<Integer> findStudentIDsByDate(@Param("targetDate") Date targetDate,@Param("type") String type);
 
 
     @Query("SELECT a FROM Attendance a " +
-            "WHERE a.student.stuID=:student AND DATE(a.date) = DATE(:targetDate)")
-    Optional<Attendance> findByStudentAndDate(@Param("student")Integer student,@Param("targetDate") Date date);
+            "WHERE a.student.stuID=:student AND DATE(a.date) = DATE(:targetDate) AND a.classType=:type")
+    Optional<Attendance> findByStudentAndDate(@Param("student")Integer student,@Param("targetDate") Date date, @Param("type") String type);
 
 
     @Query("SELECT DISTINCT a.teacher.teacherID FROM Attendance a " +
@@ -33,4 +33,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance,Integer> 
     @Query("SELECT a FROM Attendance a " +
             "WHERE a.student.stuID=:student")
     List<Attendance> findByUser(@Param("student")Integer student);
+
+    @Query("SELECT DISTINCT a.student.stuID FROM Attendance a " +
+            "WHERE a.student IS NOT NULL AND DATE(a.date) = DATE(:targetDate) AND a.classType= :type AND a.present=false")
+    List<Integer> findStudentIDsByDateAbsent(@Param("targetDate")Date attendanceDate,@Param("type") String dayCare);
 }

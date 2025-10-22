@@ -15,4 +15,5 @@ public class TestTypeDTO {
     private String testName;
     private String description;
     private Date testDate;
+    private int testClass;
 }

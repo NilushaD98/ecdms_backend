@@ -77,6 +77,13 @@ public class UserServiceIMPL implements UserService {
                     addStudentDTO.getContactOne(),
                     addStudentDTO.getContactTwo()
             );
+            Classroom classroom = new Classroom();
+            if(addStudentDTO.getProgram().equals("dc")){
+                classroom = new Classroom(1);
+            }else {
+                classroom = new Classroom(Integer.parseInt(addStudentDTO.getAgeCategory()));
+            }
+            student.setClassroom(classroom);
             student.setStatus("ACTIVE");
             studentRepository.save(student);
             boolean vortexOtp = mailSender(addStudentDTO.getEmail(), "ECDMS Password","ECDMS Password is - " + samplePassword+". Reset this when logged first time.");
@@ -387,13 +394,16 @@ public class UserServiceIMPL implements UserService {
             List<Payment> paymentList = paymentRepository.findByUserID(userID);
             List<PaymentDTO> paymentDTOList = new ArrayList<>();
             for (Payment payment:paymentList) {
+                Boolean isPendingApprove = (!payment.isPaid() && payment.getPaymentReceipt() != null) ? true : null;
                 PaymentDTO paymentDTO = new PaymentDTO(
                         payment.getPaymentId(),
                         payment.getType(),
                         payment.getAmount(),
                         payment.getDueDate(),
                         payment.getPaidDate(),
-                        payment.isPaid()
+                        isPendingApprove,
+                        payment.isPaid(),
+                        payment.getPaymentReceipt()
                 );
                 paymentDTOList.add(paymentDTO);
             }

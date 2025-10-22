@@ -23,13 +23,15 @@ public class TestType {
     private String testName;
     private String description;
     private Date testDate;
+    private int testClass;
     @OneToMany(mappedBy = "testType",fetch = FetchType.LAZY)
     private List<ExamResult> examResults = new ArrayList<>();
 
-    public TestType(String testName, String description, Date testDate) {
+    public TestType(String testName, String description, Date testDate,int testClass) {
         this.testName = testName;
         this.description = description;
         this.testDate = testDate;
+        this.testClass = testClass;
     }
 
     public TestType(Integer testTypeID) {
