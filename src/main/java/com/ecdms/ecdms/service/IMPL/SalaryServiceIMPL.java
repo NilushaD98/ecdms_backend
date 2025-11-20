@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -26,6 +28,7 @@ public class SalaryServiceIMPL implements SalaryService {
     
     private final TeacherSalaryRepository teacherSalaryRepository;
     private final TeacherRepository teacherRepository;
+    private final JavaMailSender mailSender;
 
     @Override
     public ResponseEntity addTeacherSalary(TeacherSalaryDTO teacherSalaryDTO) {
@@ -40,6 +43,7 @@ public class SalaryServiceIMPL implements SalaryService {
                 salary.setPaidDate(new Date());
                 
                 teacherSalaryRepository.save(salary);
+                sendSalaryNotificationEmail(teacher.get(), teacherSalaryDTO);
                 return new ResponseEntity(new StandardResponse(true, "Salary added successfully"), HttpStatus.OK);
             } else {
                 return new ResponseEntity(new StandardResponse(false, "Teacher not found"), HttpStatus.NOT_FOUND);
@@ -68,6 +72,22 @@ public class SalaryServiceIMPL implements SalaryService {
         } catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity(new StandardResponse(false, "Error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void sendSalaryNotificationEmail(Teacher teacher, TeacherSalaryDTO salaryDTO) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(teacher.getEmail());
+            message.setSubject("Salary Payment Notification");
+            message.setText("Dear " + teacher.getFullName() + ",\n\n" +
+                    "Your salary for " + salaryDTO.getMonth() + " " + salaryDTO.getYear() + 
+                    " has been processed.\n\n" +
+                    "Amount: $" + salaryDTO.getAmount() + "\n\n" +
+                    "Best regards,\nECDMS Admin");
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("Failed to send salary notification email: " + e.getMessage());
         }
     }
 }
