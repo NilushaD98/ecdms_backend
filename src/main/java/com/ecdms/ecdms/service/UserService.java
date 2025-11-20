@@ -1,5 +1,6 @@
 package com.ecdms.ecdms.service;
 
+import com.ecdms.ecdms.dto.common.StandardResponse;
 import com.ecdms.ecdms.dto.request.AddStudentDTO;
 import com.ecdms.ecdms.dto.request.TeacherDTO;
 import com.ecdms.ecdms.dto.request.UpdateStudentDTO;
@@ -10,7 +11,7 @@ public interface UserService {
 
     ResponseEntity getAllStudents();
 
-    ResponseEntity getStudentByID(int userID);
+    ResponseEntity<StandardResponse> getStudentByID(int userID);
 
     ResponseEntity deleteStudentByID(int userID);
 

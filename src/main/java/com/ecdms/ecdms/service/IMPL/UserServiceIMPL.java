@@ -143,7 +143,7 @@ public class UserServiceIMPL implements UserService {
     }
 
     @Override
-    public ResponseEntity getStudentByID(int userID) {
+    public ResponseEntity<StandardResponse> getStudentByID(int userID) {
 
         try{
             Optional<Student> byId = studentRepository.findById(userID);
@@ -165,7 +165,43 @@ public class UserServiceIMPL implements UserService {
                         student.getContactOne(),
                         student.getContactTwo()
                 );
-                return new ResponseEntity(new StandardResponse(200,"Student",addStudentDTO),HttpStatus.OK);
+                return new ResponseEntity<StandardResponse>(new StandardResponse(200,"Student",addStudentDTO),HttpStatus.OK);
+            }else{
+                throw new UsernameNotFoundException("User not present");
+            }
+
+        }catch (UsernameNotFoundException usernameNotFoundException){
+            throw usernameNotFoundException;
+        }
+        catch (Exception e){
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    public Student  getStudentByID2(int userID) {
+
+        try{
+            Optional<Student> byId = studentRepository.findById(userID);
+            if (byId.isPresent()){
+                Student student = byId.get();
+                AddStudentDTO addStudentDTO = new AddStudentDTO(
+                        student.getStuID(),
+                        student.getFirstName(),
+                        student.getLastName(),
+                        student.getFullName(),
+                        student.getDob(),
+                        student.getGender(),
+                        student.getAddress(),
+                        student.getProgram(),
+                        student.getAgeCategory(),
+                        student.getFullNameParent(),
+                        student.getRelationship(),
+                        student.getEmail(),
+                        student.getContactOne(),
+                        student.getContactTwo()
+                );
+                return student;
             }else{
                 throw new UsernameNotFoundException("User not present");
             }

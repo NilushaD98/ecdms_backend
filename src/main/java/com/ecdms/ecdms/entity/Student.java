@@ -68,4 +68,9 @@ public class Student {
     public Student(Integer stuID) {
         this.stuID = stuID;
     }
+
+    public Student(int stuID, String firstName) {
+        this.stuID = stuID;
+        this.firstName = firstName;
+    }
 }

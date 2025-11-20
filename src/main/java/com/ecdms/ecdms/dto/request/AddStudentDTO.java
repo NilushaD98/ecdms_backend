@@ -27,4 +27,8 @@ public class AddStudentDTO {
     private String contactOne;
     private String contactTwo;
 
+    public AddStudentDTO(int stuID, String firstName) {
+        this.stuID = stuID;
+        this.firstName = firstName;
+    }
 }
